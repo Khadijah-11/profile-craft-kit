@@ -17,8 +17,26 @@ type ProfileEditorProps = {
   setHasUnsavedChanges: (value: boolean) => void;
 };
 
+interface SocialLinks {
+  github: string;
+  linkedin: string;
+  twitter: string;
+  dribbble: string;
+}
+
+interface ProfileData {
+  name: string;
+  title: string;
+  location: string;
+  email: string;
+  phone: string;
+  about: string;
+  socialLinks: SocialLinks;
+  profileImage: string;
+}
+
 const ProfileEditor = ({ setHasUnsavedChanges }: ProfileEditorProps) => {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileData>({
     name: "Alex Morgan",
     title: "Full Stack Developer",
     location: "San Francisco, CA",
@@ -46,13 +64,15 @@ const ProfileEditor = ({ setHasUnsavedChanges }: ProfileEditorProps) => {
     
     if (name.includes(".")) {
       const [parent, child] = name.split(".");
-      setProfile({
-        ...profile,
-        [parent]: {
-          ...profile[parent as keyof typeof profile],
-          [child]: value,
-        },
-      });
+      if (parent === "socialLinks") {
+        setProfile({
+          ...profile,
+          socialLinks: {
+            ...profile.socialLinks,
+            [child]: value,
+          },
+        });
+      }
     } else {
       setProfile({
         ...profile,

@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Routes, Route, Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
@@ -17,13 +17,24 @@ import {
   FolderKanban,
   Settings,
   Eye,
+  Palette,
 } from "lucide-react";
 
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState(searchParams.get("template") || "modern");
+
+  useEffect(() => {
+    // Set template from URL if available
+    const templateParam = searchParams.get("template");
+    if (templateParam) {
+      setSelectedTemplate(templateParam);
+    }
+  }, [searchParams]);
 
   const getCurrentTab = () => {
     const path = location.pathname;
@@ -56,15 +67,33 @@ const Dashboard = () => {
     }, 500);
   };
 
+  const getTemplateDisplayName = () => {
+    switch (selectedTemplate) {
+      case "modern": return "Modern";
+      case "creative": return "Creative";
+      case "professional": return "Professional";
+      case "minimalist": return "Minimalist";
+      default: return "Default";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardNavbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Edit Your Portfolio</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl font-bold">Edit Your Portfolio</h1>
+            <p className="text-gray-500">
+              Template: {getTemplateDisplayName()} 
+              <Link to="/templates" className="ml-2 text-blue-600 hover:underline">
+                Change
+              </Link>
+            </p>
+          </div>
           <div className="flex space-x-3">
-            <Link to="/portfolio/demo" target="_blank">
+            <Link to={`/portfolio/${selectedTemplate}-demo`} target="_blank">
               <Button variant="outline" className="flex items-center">
                 <Eye className="mr-2 h-4 w-4" />
                 Preview
@@ -82,7 +111,7 @@ const Dashboard = () => {
         
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <Tabs value={getCurrentTab()} onValueChange={handleTabChange}>
-            <TabsList className="w-full justify-start border-b p-0">
+            <TabsList className="w-full justify-start border-b p-0 overflow-x-auto">
               <TabsTrigger
                 value="profile"
                 className="flex items-center px-6 py-4 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
